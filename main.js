@@ -84,6 +84,11 @@ class FractalDots {
 		this.stepRatio = 0.9;
 
 		/**
+		 * @type {number}
+		 */
+		this.sideStep = 0;
+
+		/**
 		 * @type {CanvasRenderingContext2D}
 		 */
 		this.context = context;
@@ -153,7 +158,15 @@ class FractalDots {
 
 		const dot = ArrayHelper.random(this.dots);
 
-		this.position = Point.lerp(this.position, dot, this.stepRatio);
+		const diff = dot.add(this.position.scale(-1, -1));
+		const sideways = new Point(diff.y, -diff.x).scale(
+			this.sideStep * this.stepRatio,
+			this.sideStep * this.stepRatio
+		);
+
+		this.position = Point.lerp(this.position, dot, this.stepRatio).add(
+			sideways
+		);
 
 		this.drawDotAt(this.position);
 	}
@@ -220,6 +233,11 @@ class UI {
 			() => this.getStepDelay(),
 			(val) => this.setStepDelay(val)
 		);
+		this.bindInputValue(
+			'js_side-step',
+			() => this.getSideStep(),
+			(val) => this.setSideStep(val)
+		);
 	}
 
 	bindButtonClick(cssClass, callback) {
@@ -274,6 +292,17 @@ class UI {
 		const val = Number.parseFloat(value);
 		if (!isNaN(val)) {
 			this.app.stepRatio = val;
+		}
+	}
+
+	getSideStep() {
+		return this.app.sideStep;
+	}
+
+	setSideStep(value) {
+		const val = Number.parseFloat(value);
+		if (!isNaN(val)) {
+			this.app.sideStep = val;
 		}
 	}
 
