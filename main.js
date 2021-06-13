@@ -198,44 +198,44 @@ class UI {
 		this.canvas.addEventListener('click', (e) => {
 			this.canvasClick(e.clientX, e.clientY);
 		});
-		this.resetBtn = document.getElementsByClassName('js_reset-btn');
-		[...this.resetBtn].forEach((btn) =>
-			btn.addEventListener('click', () => this.reset())
-		);
-		this.startBtn = document.getElementsByClassName('js_start-btn');
-		[...this.startBtn].forEach((btn) =>
-			btn.addEventListener('click', () => this.start())
-		);
-		this.pauseBtn = document.getElementsByClassName('js_pause-btn');
-		[...this.pauseBtn].forEach((btn) =>
-			btn.addEventListener('click', () => this.pause())
-		);
-		this.stepBtn = document.getElementsByClassName('js_step-btn');
-		[...this.stepBtn].forEach((btn) =>
-			btn.addEventListener('click', () => this.step())
-		);
-		this.clearBtn = document.getElementsByClassName('js_clear-btn');
-		[...this.clearBtn].forEach((btn) =>
-			btn.addEventListener('click', () => this.clear())
-		);
 
-		/** @type {HTMLInputElement} */
-		this.jumpRatioIpt = /** @type {HTMLInputElement} */ (
-			document.getElementsByClassName('js_jump-ratio')[0]
+		this.bindButtonClick('js_reset-btn', () => this.reset());
+		this.bindButtonClick('js_start-btn', () => this.start());
+		this.bindButtonClick('js_pause-btn', () => this.pause());
+		this.bindButtonClick('js_step-btn', () => this.step());
+		this.bindButtonClick('js_clear-btn', () => this.clear());
+
+		this.bindInputValue(
+			'js_jump-ratio',
+			() => this.getJumpRatio(),
+			(val) => this.setJumpRatio(val)
 		);
-		this.jumpRatioIpt.addEventListener('input', () => this.setJumpRatio());
-		/** @type {HTMLInputElement} */
-		this.iterationsPerStepIpt = /** @type {HTMLInputElement} */ (
-			document.getElementsByClassName('js_iterations-per-step')[0]
+		this.bindInputValue(
+			'js_iterations-per-step',
+			() => this.getIterationsPerStep(),
+			(val) => this.setIterationsPerStep(val)
 		);
-		this.iterationsPerStepIpt.addEventListener('input', () =>
-			this.setIterationsPerStep()
+		this.bindInputValue(
+			'js_step-delay',
+			() => this.getStepDelay(),
+			(val) => this.setStepDelay(val)
 		);
-		/** @type {HTMLInputElement} */
-		this.stepDelayIpt = /** @type {HTMLInputElement} */ (
-			document.getElementsByClassName('js_step-delay')[0]
-		);
-		this.stepDelayIpt.addEventListener('input', () => this.setStepDelay());
+	}
+
+	bindButtonClick(cssClass, callback) {
+		for (const button of document.getElementsByClassName(cssClass)) {
+			button.addEventListener('click', callback);
+		}
+	}
+
+	bindInputValue(cssClass, getter, setter) {
+		for (const input of document.getElementsByClassName(cssClass)) {
+			if (input instanceof HTMLInputElement) {
+				input.value = getter();
+
+				input.addEventListener('input', () => setter(input.value));
+			}
+		}
 	}
 
 	/**
@@ -266,20 +266,34 @@ class UI {
 		this.app.clear();
 	}
 
-	setJumpRatio() {
-		const val = Number.parseFloat(this.jumpRatioIpt.value);
+	getJumpRatio() {
+		return this.app.stepRatio;
+	}
+
+	setJumpRatio(value) {
+		const val = Number.parseFloat(value);
 		if (!isNaN(val)) {
 			this.app.stepRatio = val;
 		}
 	}
-	setIterationsPerStep() {
-		const val = Number.parseInt(this.iterationsPerStepIpt.value);
+
+	getIterationsPerStep() {
+		return this.app.iterationsPerStep;
+	}
+
+	setIterationsPerStep(value) {
+		const val = Number.parseInt(value);
 		if (!isNaN(val)) {
 			this.app.iterationsPerStep = val;
 		}
 	}
-	setStepDelay() {
-		const val = Number.parseInt(this.stepDelayIpt.value);
+
+	getStepDelay() {
+		return this.app.stepDelay;
+	}
+
+	setStepDelay(value) {
+		const val = Number.parseInt(value);
 		if (!isNaN(val)) {
 			const running = this.app.isRunning();
 			this.app.stop();
