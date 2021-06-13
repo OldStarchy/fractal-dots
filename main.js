@@ -51,6 +51,14 @@ class Point {
 	static lerp(a, b, mix) {
 		return a.add(b.add(a.scale(-1, -1)).scale(mix, mix));
 	}
+
+	isNaN() {
+		return isNaN(this.x) || isNaN(this.y);
+	}
+
+	isInfinity() {
+		return Math.abs(this.x) === Infinity || Math.abs(this.y) === Infinity;
+	}
 }
 
 class ArrayHelper {
@@ -146,7 +154,11 @@ class FractalDots {
 	}
 
 	advanceOneDot() {
-		if (this.position === null) {
+		if (
+			this.position === null ||
+			this.position.isNaN() ||
+			this.position.isInfinity()
+		) {
 			this.position = Point.random().scale(
 				this.context.canvas.width,
 				this.context.canvas.height
