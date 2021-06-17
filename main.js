@@ -110,6 +110,16 @@ class FractalDots {
 		 * @type {number}
 		 */
 		this.stepDelay = 10;
+
+		/**
+		 * @type {boolean}
+		 */
+		this.doTrippyEffect = false;
+
+		/**
+		 * @type {number}
+		 */
+		this.time = 0;
 	}
 
 	/**
@@ -146,6 +156,32 @@ class FractalDots {
 	step() {
 		if (this.dots.length < 2) {
 			return;
+		}
+
+		if (this.doTrippyEffect) {
+			this.time++;
+
+			this.context.save();
+			this.context.translate(
+				this.context.canvas.width / 2,
+				this.context.canvas.height / 2
+			);
+			const scale = 1 + 0.05 * Math.sin(this.time * 0.008);
+			this.context.scale(scale, scale);
+			this.context.rotate(0.01 * Math.sin(this.time * 0.01));
+			this.context.translate(
+				-this.context.canvas.width / 2,
+				-this.context.canvas.height / 2
+			);
+			this.context.drawImage(this.context.canvas, 0, 0);
+			this.context.restore();
+			this.context.fillStyle = '#ffffff08';
+			this.context.fillRect(
+				0,
+				0,
+				this.context.canvas.width,
+				this.context.canvas.height
+			);
 		}
 
 		for (let index = 0; index < this.iterationsPerStep; index++) {
@@ -250,6 +286,11 @@ class UI {
 			() => this.getSideStep(),
 			(val) => this.setSideStep(val)
 		);
+		this.bindInputChecked(
+			'js_trippy-effect',
+			() => this.getTrippyEffect(),
+			(checked) => this.setTrippyEffect(checked)
+		);
 	}
 
 	bindButtonClick(cssClass, callback) {
@@ -264,6 +305,16 @@ class UI {
 				input.value = getter();
 
 				input.addEventListener('input', () => setter(input.value));
+			}
+		}
+	}
+
+	bindInputChecked(cssClass, getter, setter) {
+		for (const input of document.getElementsByClassName(cssClass)) {
+			if (input instanceof HTMLInputElement) {
+				input.checked = getter();
+
+				input.addEventListener('input', () => setter(input.checked));
 			}
 		}
 	}
@@ -341,6 +392,14 @@ class UI {
 			this.app.stepDelay = val;
 			if (running) this.app.start();
 		}
+	}
+
+	getTrippyEffect() {
+		return this.app.doTrippyEffect;
+	}
+
+	setTrippyEffect(checked) {
+		this.app.doTrippyEffect = checked;
 	}
 }
 
